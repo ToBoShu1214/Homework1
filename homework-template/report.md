@@ -1,103 +1,209 @@
-# 41143263
+
+
+**41243217 杜長勳  41243222 林諺晟**  
 
 作業一
 
+---
+
 ## 解題說明
 
-本題要求實現一個遞迴函式，計算從 $1$ 到 $n$ 的連加總和。
+本報告實作並比較了五種常見排序演算法的效能：
 
-### 解題策略
+- **插入排序（Insertion Sort）**
+- **選擇排序（Selection Sort）**
+- **快速排序（Quick Sort）**
+- **合併排序（Merge Sort）**
+- **堆疊排序（Heap Sort）**
 
-1. 使用遞迴函式將問題拆解為更小的子問題：
-   $$\Sigma(n) = n + \Sigma(n-1)$$
-2. 當 $n \leq 1$ 時，返回 $n$ 作為遞迴的結束條件。  
-3. 主程式呼叫遞迴函式，並輸出計算結果。
+測試目標為分析各演算法在不同輸入大小下的執行時間，並探討其效能特性。
 
-## 程式實作
+---
 
-以下為主要程式碼：
+## 演算法設計與實作
 
+### 插入排序 (Insertion Sort)
+插入排序的核心思想是將資料一一插入已排序的部分：
 ```cpp
-#include <iostream>
-using namespace std;
-
-int sigma(int n) {
-    if (n < 0)
-        throw "n < 0";
-    else if (n <= 1)
-        return n;
-    return n + sigma(n - 1);
-}
-
-int main() {
-    int result = sigma(3);
-    cout << result << '\n';
+// 插入排序實作
+void insertionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
 }
 ```
+
+### 選擇排序 (Selection Sort)
+```cpp
+// 選擇排序實作
+void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}
+```
+
+### 快速排序 (Quick Sort)
+```cpp
+// 快速排序主程式（含閾值優化）
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low + 10 <= high) {
+        int pivotIndex = partition(arr, low, high);
+        quickSort(arr, low, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, high);
+    } else {
+        insertionSort(arr);
+    }
+}
+
+// 三數取中 pivot
+int medianOfThree(vector<int>& arr, int low, int high) {
+    int mid = low + (high - low) / 2;
+    if (arr[low] > arr[mid]) swap(arr[low], arr[mid]);
+    if (arr[low] > arr[high]) swap(arr[low], arr[high]);
+    if (arr[mid] > arr[high]) swap(arr[mid], arr[high]);
+    swap(arr[mid], arr[high - 1]);
+    return arr[high - 1];
+}
+```
+
+### 合併排序 (Merge Sort)
+```cpp
+// 迭代式合併排序
+void mergeSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int size = 1; size < n; size *= 2) {
+        for (int left = 0; left < n - size; left += 2 * size) {
+            int mid = left + size - 1;
+            int right = min(left + 2 * size - 1, n - 1);
+            merge(arr, left, mid, right);
+        }
+    }
+}
+```
+
+### 堆疊排序 (Heap Sort)
+```cpp
+// 堆排序實作
+void heapSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+    }
+}
+```
+
+---
 
 ## 效能分析
 
-1. 時間複雜度：程式的時間複雜度為 $O(\log n)$。
-2. 空間複雜度：空間複雜度為 $O(100\times \log n + \pi)$。
+### 時間複雜度比較
 
-## 測試與驗證
+| 演算法 | 最佳情況 | 平均情況 | 最壞情況 |
+|---------|---------|---------|---------|
+| 插入排序 | O(n) | O(n^2) | O(n^2) |
+| 選擇排序 | O(n^2) | O(n^2) | O(n^2) |
+| 快速排序 | O(n log n) | O(n log n) | O(n^2) |
+| 合併排序 | O(n log n) | O(n log n) | O(n log n) |
+| 堆疊排序 | O(n log n) | O(n log n) | O(n log n) |
 
-### 測試案例
+### 空間複雜度
 
-| 測試案例 | 輸入參數 $n$ | 預期輸出 | 實際輸出 |
-|----------|--------------|----------|----------|
-| 測試一   | $n = 0$      | 0        | 0        |
-| 測試二   | $n = 1$      | 1        | 1        |
-| 測試三   | $n = 3$      | 6        | 6        |
-| 測試四   | $n = 5$      | 15       | 15       |
-| 測試五   | $n = -1$     | 異常拋出 | 異常拋出 |
+| 演算法       | 空間複雜度         |
+|--------------|--------------------|
+| 插入排序     | O(1)               |
+| 選擇排序     | O(1)               |
+| 快速排序     | O(log n)（最壞 O(n)） |
+| 合併排序     | O(n)               |
+| 堆疊排序       | O(1)               |
 
-### 編譯與執行指令
+### 穩定性分析
 
-```shell
-$ g++ -std=c++17 -o sigma sigma.cpp
-$ ./sigma
-6
+| 演算法       | 穩定性   |
+|--------------|----------|
+| 插入排序     | ✅ 穩定  |
+| 選擇排序     | ❌ 不穩定 |
+| 快速排序     | ❌ 不穩定 |
+| 合併排序     | ✅ 穩定  |
+| 堆疊排序       | ❌ 不穩定 |
+
+### 效能趨勢觀察
+
+1. **O(n^2) 演算法**：隨資料量增加，執行時間呈二次方增長。
+2. **O(n log n) 演算法**：隨資料量增加，成長速度較平緩，適合大型資料集。
+
+---
+
+## 測試與結果
+
+測試使用不同大小的隨機整數陣列（500 至 50000 元素），使用 `chrono` 計時工具測量每種排序演算法執行時間。
+
+```cpp
+void testSorting(vector<int>& arr, void (*sortFunc)(vector<int>&), string sortName) {
+    auto start = high_resolution_clock::now();
+    sortFunc(arr);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << sortName << " took " << duration.count() << " ms." << endl;
+}
 ```
 
-### 結論
+### 測試結果
 
-1. 程式能正確計算 $n$ 到 $1$ 的連加總和。  
-2. 在 $n < 0$ 的情況下，程式會成功拋出異常，符合設計預期。  
-3. 測試案例涵蓋了多種邊界情況（$n = 0$、$n = 1$、$n > 1$、$n < 0$），驗證程式的正確性。
+![image](https://github.com/user-attachments/assets/61bf8fc4-f088-43f6-bb75-2af333ee5761)
 
-## 申論及開發報告
+---
+| n       | Insertion Sort | Selection Sort | Quick Sort | Merge Sort | Heap Sort |
+|---------|----------------|----------------|-------------|-------------|-------------|
+| 500     | 0 ms           | 0 ms           | 0 ms        | 1 ms        | 0 ms        |
+| 1000    | 2 ms           | 3 ms           | 2 ms        | 3 ms        | 0 ms        |
+| 2000    | 12 ms          | 14 ms          | 15 ms       | 6 ms        | 0 ms        |
+| 4000    | 45 ms          | 60 ms          | 31 ms       | 16 ms       | 1 ms        |
+| 5000    | 72 ms          | 112 ms         | 95 ms       | 15 ms       | 1 ms        |
+| 10000   | 292 ms         | 389 ms         | 339 ms      | 30 ms       | 5 ms        |
+| 50000   | 7120 ms        | 9289 ms        | 8013 ms     | 154 ms      | 23 ms       |
 
-### 選擇遞迴的原因
 
-在本程式中，使用遞迴來計算連加總和的主要原因如下：
+![image](https://github.com/user-attachments/assets/47e297e1-6e68-4ab1-9dd7-81cdeb214855)
 
-1. **程式邏輯簡單直觀**  
-   遞迴的寫法能夠清楚表達「將問題拆解為更小的子問題」的核心概念。  
-   例如，計算 $\Sigma(n)$ 的過程可分解為：  
 
-   $$
-   \Sigma(n) = n + \Sigma(n-1)
-   $$
+---
 
-   當 $n$ 等於 1 或 0 時，直接返回結果，結束遞迴。
+## 結論
 
-2. **易於理解與實現**  
-   遞迴的程式碼更接近數學公式的表示方式，特別適合新手學習遞迴的基本概念。  
-   以本程式為例：  
+### 小資料集（n < 100）
+- 插入排序效率優秀，實作簡單。
+- 快速排序的「小陣列改插入排序」優化，提升了其在小資料的表現。
 
-   ```cpp
-   int sigma(int n) {
-       if (n < 0)
-           throw "n < 0";
-       else if (n <= 1)
-           return n;
-       return n + sigma(n - 1);
-   }
-   ```
+### 大資料集
+- **快速排序** 通常表現最佳，但需注意最壞情況。
+- **合併排序** 在效能與穩定性之間取得良好平衡。
+- **堆排序** 雖然速度略慢，但空間使用少，適合記憶體受限情境。
 
-3. **遞迴的語意清楚**  
-   在程式中，每次遞迴呼叫都代表一個「子問題的解」，而最終遞迴的返回結果會逐層相加，完成整體問題的求解。  
-   這種設計簡化了邏輯，不需要額外變數來維護中間狀態。
+### 應用建議總結
 
-透過遞迴實作 Sigma 計算，程式邏輯簡單且易於理解，特別適合展示遞迴的核心思想。然而，遞迴會因堆疊深度受到限制，當 $n$ 值過大時，應考慮使用迭代版本來避免 Stack Overflow 問題。
+| 情境              | 推薦演算法   |
+|-------------------|----------------|
+| 小型資料           | 插入排序       |
+| 資料近乎有序       | 插入排序       |
+| 一般情況最佳效能   | 快速排序       |
+| 穩定排序需求       | 合併排序       |
+| 記憶體使用需嚴格控制 | 堆疊排序         |
+
+---
